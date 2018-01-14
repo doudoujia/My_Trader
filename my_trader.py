@@ -20,71 +20,71 @@ import pprint
 from datetime import timedelta
 
 def beta(ticker_list,bench = "SPY"):    
-    # will return a dataframe
-    betas = []
-    
-    ben_mark= da.DataReader(bench,"yahoo",datetime.now()-timedelta(days=90),datetime.now())
-    for i in list(ticker_list):
-        ticker = i
-        try:
-            stock = da.DataReader(str(ticker),"yahoo",datetime.now()-timedelta(days=90),datetime.now())
-        except:
-            print (str(i)+" ticker maybe wrong. Error in getting data from yahoo")
-            betas.append(np.NaN)
-            continue
+	# will return a dataframe
+	betas = []
+	
+	ben_mark= da.DataReader(bench,"yahoo",datetime.now()-timedelta(days=90),datetime.now())
+	for i in list(ticker_list):
+		ticker = i
+		try:
+			stock = da.DataReader(str(ticker),"yahoo",datetime.now()-timedelta(days=90),datetime.now())
+		except:
+			print (str(i)+" ticker maybe wrong. Error in getting data from yahoo")
+			betas.append(np.NaN)
+			continue
 
-        # get return and put them in a new dataframe
+		# get return and put them in a new dataframe
 
-        ben_mark=ben_mark.rename(columns ={"Adj Close":bench})
-        stock = stock.rename(columns = {"Adj Close":ticker})
-        ben_mark[bench + "_re"] = log(ben_mark[bench]/ben_mark[bench].shift(1))
-        stock[ticker + "_re"] = log(stock[ticker]/stock[ticker].shift(1))
-        new = pd.concat([ben_mark,stock],axis =1)
-        new = new[[bench,bench + "_re",ticker, ticker + "_re" ]]
-        new = new.dropna()
+		ben_mark=ben_mark.rename(columns ={"Adj Close":bench})
+		stock = stock.rename(columns = {"Adj Close":ticker})
+		ben_mark[bench + "_re"] = log(ben_mark[bench]/ben_mark[bench].shift(1))
+		stock[ticker + "_re"] = log(stock[ticker]/stock[ticker].shift(1))
+		new = pd.concat([ben_mark,stock],axis =1)
+		new = new[[bench,bench + "_re",ticker, ticker + "_re" ]]
+		new = new.dropna()
 
-        #calculate beta using covariance matrix
-        covmat = np.cov(new[bench + "_re"],new[ticker + "_re"])
-        beta = covmat[0,1]/  np.sqrt(covmat[1,1]*covmat[0,0])
-        betas.append(beta)
-    betas = pd.DataFrame(betas)
-    betas.index = ticker_list
-    betas.columns=["Beta"]
-    return betas, covmat
+		#calculate beta using covariance matrix
+		covmat = np.cov(new[bench + "_re"],new[ticker + "_re"])
+		beta = covmat[0,1]/  np.sqrt(covmat[1,1]*covmat[0,0])
+		betas.append(beta)
+	betas = pd.DataFrame(betas)
+	betas.index = ticker_list
+	betas.columns=["Beta"]
+	return betas, covmat
 
 class get_robinhood:
 
 	my_trader = Robinhood()
 
-    # Placing buy orders (Robinhood.place_buy_order)
-    # Placing sell order (Robinhood.place_sell_order)
-    # Quote information (Robinhood.quote_data)
-    # User portfolio data (Robinhood.portfolios)
-    # User positions data (Robinhood.positions)
-    # Examples:
-    # stock_instrument = my_trader.instruments("GEVO")[0]
-    # quote_info = my_trader.quote_data("GEVO")
-    # buy_order = my_trader.place_buy_order(stock_instrument, 1)
-    # sell_order = my_trader.place_sell_order(stock_instrument, 1)
+	# Placing buy orders (Robinhood.place_buy_order)
+	# Placing sell order (Robinhood.place_sell_order)
+	# Quote information (Robinhood.quote_data)
+	# User portfolio data (Robinhood.portfolios)
+	# User positions data (Robinhood.positions)
+	# Examples:
+	# stock_instrument = my_trader.instruments("GEVO")[0]
+	# quote_info = my_trader.quote_data("GEVO")
+	# buy_order = my_trader.place_buy_order(stock_instrument, 1)
+	# sell_order = my_trader.place_sell_order(stock_instrument, 1)
 
 	def get_universe(self):
-        # must inclue Stock.xlsx in the dir
+		# must inclue Stock.xlsx in the dir
 		self.universe=pd.read_excel('Stock.xlsx',sheet_name='USlist',header=0)
 		return self.universe['Ticker']
 
 
 	def get_historical(self,stock,interval='day',span='year',ifprint=False):
-        
-        
-        #fetch historical data for stock
+		
+		
+		#fetch historical data for stock
 
-        #Note: valid interval/span configs
-        #interval = 5minute | 10minute + span = day, week
-        #interval = day + span = year
-        #interval = week
-        #TODO: NEEDS TESTS
+		#Note: valid interval/span configs
+		#interval = 5minute | 10minute + span = day, week
+		#interval = day + span = year
+		#interval = week
+		#TODO: NEEDS TESTS
 
-        
+		
 
 		quote_info = self.my_trader.get_historical_quotes(stock,interval,span)['results']
 
@@ -103,7 +103,7 @@ class get_robinhood:
 	#Get stock information
 	#Note: Sometimes more than one instrument may be returned for a given stock symbol
 
-    #login
+	#login
 	def login(self,username,password):
 		#username=str(input("Please input username"))
 		#password = str(input("Please input password"))
@@ -185,50 +185,56 @@ class get_robinhood:
 		return profile_temp['tradeable']
 
 	def place_buy(self, ticker,num):
-	    stock_inst = self.my_trader.instruments(ticker)
-        if stock_inst["symbol"]==ticker:
-            print ("Ticker found in instruments")
-        if self.my_trader.place_buy_order(stock_inst,num) == "<Response [201]>":
-            print ("Trade Success!: " + ticker)
-        else:
-            print ("Trade Fail: " + ticker)
-        time.sleep(10)
-	def place_sell(self, ticker,num):
-	    stock_inst = self.my_trader.instruments(ticker)
-        if stock_inst["symbol"]==ticker:
-            print ("Ticker found in instruments")
-        if self.my_trader.place_sell_order(stock_inst,num) == "<Response [201]>":
-            print ("Trade Success!: " + ticker)
-        else:
-            print ("Trade Fail: " + ticker)
-        time.sleep(10)
+		for i in self.my_trader.instruments(ticker):
+			stock_inst = i
+			if stock_inst["symbol"]==ticker:
+				print ("Ticker found in instruments")
+				if self.my_trader.place_buy_order(stock_inst,num) == "<Response [201]>":
+					 print ("Trade Success!: " + ticker)
+				else:
+					 print ("Trade Fail: " + ticker)
+				time.sleep(10)
+				return
+		print ("Ticker not found in instruments")
 
+	def place_sell(self, ticker,num):
+		for i in self.my_trader.instruments(ticker):
+			stock_inst = i
+			if stock_inst["symbol"]==ticker:
+				print ("Ticker found in instruments")
+				if self.my_trader.place_sell_order(stock_inst,num) == "<Response [201]>":
+					 print ("Trade Success!: " + ticker)
+				else:
+					 print ("Trade Fail: " + ticker)
+				time.sleep(10)
+				return
+		print ("Ticker not found in instruments")
 	def get_my_positions(self):   
-	    my_positions=[]
-	    position_quantity = []
-	    for i in self.my_trader.positions()["results"]:
-	        if float(i["quantity"])>0:
-	            position_quantity.append(float(i["quantity"]))
-	            ticker = self.my_trader.get_url(i["instrument"])
-	            my_positions.append(ticker["symbol"])
-	            print ticker["symbol"] + " "+ str(i["quantity"])
-	    return my_positions, position_quantity
+		my_positions=[]
+		position_quantity = []
+		for i in self.my_trader.positions()["results"]:
+			if float(i["quantity"])>0:
+				position_quantity.append(float(i["quantity"]))
+				ticker = self.my_trader.get_url(i["instrument"])
+				my_positions.append(ticker["symbol"])
+				print ticker["symbol"] + " "+ str(i["quantity"])
+		return my_positions, position_quantity
 	def get_buying_power(self):
-	    buy = self.my_trader.get_account()["buying_power"]
-	    print str(buy)
-	    return float(buy)
+		buy = self.my_trader.get_account()["buying_power"]
+		print str(buy)
+		return float(buy)
 
 	def get_my_position_beta(self):
-	    stocks, quantity =self.get_my_positions()
-	    quantity = pd.DataFrame(quantity,index = stocks,columns=["Quantity"])
-	    betas = beta(stocks)
-	    betas = pd.DataFrame(betas[0])
-	    data = pd.concat([betas,quantity],axis=1)
-	    data = data.fillna(1)
-	    sum_beta=np.dot(data.Beta,data.Quantity)
-	    print sum_beta
-	    print data
-	    return sum_beta,data
+		stocks, quantity =self.get_my_positions()
+		quantity = pd.DataFrame(quantity,index = stocks,columns=["Quantity"])
+		betas = beta(stocks)
+		betas = pd.DataFrame(betas[0])
+		data = pd.concat([betas,quantity],axis=1)
+		data = data.fillna(1)
+		sum_beta=np.dot(data.Beta,data.Quantity)
+		print sum_beta
+		print data
+		return sum_beta,data
 
 
 	#def get_my_position_chart (TODO)
