@@ -185,25 +185,23 @@ class get_robinhood:
 		return profile_temp['tradeable']
 
 	def place_buy(self, ticker,num):
-	    for i in self.my_trader.instruments(ticker):
-	        if i["symbol"]==ticker:
-	            print ("Ticker found in instruments")
-	            stock_inst = i
-	        if self.my_trader.place_buy_order(stock_inst,num) == "<Response [201]>":
-	            print "Trade Success!: " + stock_inst
-	        else:
-	            print "Trade Faile: " + stock_inst
-	        time.sleep(10)
+	    stock_inst = self.my_trader.instruments(ticker)
+        if stock_inst["symbol"]==ticker:
+            print ("Ticker found in instruments")
+        if self.my_trader.place_buy_order(stock_inst,num) == "<Response [201]>":
+            print ("Trade Success!: " + ticker)
+        else:
+            print ("Trade Fail: " + ticker)
+        time.sleep(10)
 	def place_sell(self, ticker,num):
-	    for i in self.my_trader.instruments(ticker):
-	        if i["symbol"]==ticker:
-	            print ("Ticker found in instruments")
-	            stock_inst = i
-	        if self.my_trader.place_sell_order(stock_inst,num) == "<Response [201]>":
-	            print "Trade Success!: " + stock_inst
-	        else:
-	            print "Trade Faile: " + stock_inst
-	        time.sleep(10)
+	    stock_inst = self.my_trader.instruments(ticker)
+        if stock_inst["symbol"]==ticker:
+            print ("Ticker found in instruments")
+        if self.my_trader.place_sell_order(stock_inst,num) == "<Response [201]>":
+            print ("Trade Success!: " + ticker)
+        else:
+            print ("Trade Fail: " + ticker)
+        time.sleep(10)
 
 	def get_my_positions(self):   
 	    my_positions=[]
@@ -240,13 +238,13 @@ class get_robinhood:
 
 
 
-	def place_buy_lumpsum_checkdup(self, ticker_list, quantity_list ):
+	def place_buy_bulk_checkdup(self, ticker_list, quantity_list ):
 		my_positions = self.get_my_positions()[0]
 		for t, q in zip(ticker_list, quantity_list):
 			if t in my_positions:
 				self.place_buy(t,q)
 
-	def place_buy_lumpsum_nocheck(self, ticker_list, quantity_list ):
+	def place_buy_bulk_nocheck(self, ticker_list, quantity_list ):
 		my_positions = self.get_my_positions()[0]
 		for t, q in zip(ticker_list, quantity_list):
 				self.place_buy(t,q)
