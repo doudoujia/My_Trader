@@ -19,24 +19,38 @@ import seaborn as sns
 import pprint
 from datetime import timedelta
 
-def beta(ticker_list,bench = "SPY"):    
+def beta(ticker_list,bench = "SPY", interval="day"):    
 	# will return a dataframe
+	robinhood = get_robinhood()
 	betas = []
-	
-	ben_mark= da.DataReader(bench,"yahoo",datetime.now()-timedelta(days=90),datetime.now())
+	ben_mark=pd.DataFrame()
+	if interval == "day":
+		ben_mark= da.DataReader(bench,"yahoo",datetime.now()-timedelta(days=90),datetime.now())
+		ben_mark=ben_mark.rename(columns ={"Adj Close":bench})
+	elif interval == "minute":
+		ben_mark = robinhood.get_historical(bench,interval="10minute",span = "week")
+		ben_mark=ben_mark.rename(columns ={"close_price":bench})
+		ben_mark[bench]=ben_mark[bench].astype(float)
 	for i in list(ticker_list):
 		ticker = i
 		try:
-			stock = da.DataReader(str(ticker),"yahoo",datetime.now()-timedelta(days=90),datetime.now())
+			if interval =="day":
+
+				stock = da.DataReader(str(ticker),"yahoo",datetime.now()-timedelta(days=90),datetime.now())
+				stock = stock.rename(columns = {"Adj Close":ticker})
+			elif interval == "minute":
+				stock= robinhood.get_historical(ticker,interval="10minute",span = "week")
+				stock=stock.rename(columns ={"close_price":ticker})
+				stock[ticker] = stock[ticker].astype(float)
 		except:
-			print (str(i)+" ticker maybe wrong. Error in getting data from yahoo")
+			print (str(i)+" ticker maybe wrong. Error in getting data")
 			betas.append(np.NaN)
 			continue
 
 		# get return and put them in a new dataframe
 
-		ben_mark=ben_mark.rename(columns ={"Adj Close":bench})
-		stock = stock.rename(columns = {"Adj Close":ticker})
+		
+		
 		ben_mark[bench + "_re"] = log(ben_mark[bench]/ben_mark[bench].shift(1))
 		stock[ticker + "_re"] = log(stock[ticker]/stock[ticker].shift(1))
 		new = pd.concat([ben_mark,stock],axis =1)
@@ -230,13 +244,23 @@ class get_robinhood:
 		betas = beta(stocks)
 		betas = pd.DataFrame(betas[0])
 		data = pd.concat([betas,quantity],axis=1)
-		data = data.fillna(1)
+		data = data.fillna(0)
 		sum_beta=np.dot(data.Beta,data.Quantity)
 		print sum_beta
 		print data
 		return sum_beta,data
 
-
+	def get_my_position_beta_minute(self):
+		stocks, quantity =self.get_my_positions()
+		quantity = pd.DataFrame(quantity,index = stocks,columns=["Quantity"])
+		betas = beta(stocks,interval="minute")
+		betas = pd.DataFrame(betas[0])
+		data = pd.concat([betas,quantity],axis=1)
+		data = data.fillna(0)
+		sum_beta=np.dot(data.Beta,data.Quantity)
+		print sum_beta
+		print data
+		return sum_beta,data
 	#def get_my_position_chart (TODO)
 
 

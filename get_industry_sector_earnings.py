@@ -55,3 +55,7 @@ def update_fundamentals():
 
 	runtime = stop - start
 	print  runtime
+
+
+	if __name__  == "__main__":
+		update_fundamentals()

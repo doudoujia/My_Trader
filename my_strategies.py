@@ -307,11 +307,13 @@ def plot_position(tickers, quantity):
     data_weighted["STOCH_slowk"], data_weighted["STOCH_slowd"] = ta.STOCHF(data_weighted["Sum_High"].values, data_weighted["Sum_Low"].values, data_weighted["Sum_Close"].values, fastk_period=5, fastd_period=3, fastd_matype=0)
     plt.figure(1,figsize = (18,18))
     sub = plt.subplot(211)
+    plt.title("Position")
     data_weighted.Sum_Close.plot()
     data_weighted.Sum_Close_MA_F.plot()
     data_weighted.Sum_Close_MA_S.plot()
     plt.legend()
     plt.subplot(212,sharex=sub)
+    plt.title("STOCH")
     data_weighted.STOCH_slowd.plot()
     data_weighted.STOCH_slowk.plot()
 

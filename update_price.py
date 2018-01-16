@@ -72,7 +72,7 @@ def update_price():
     '''
 
 
-    industry_sector_earnings = pd.read_csv("my_universe_industry_sector_marketcap_earnings.csv")
+    industry_sector_earnings = pd.read_csv("file/my_universe_industry_sector_marketcap_earnings.csv")
     #earnings = pd.read_csv("my_universe_earnings.csv")
 
     industry_sector_earnings = industry_sector_earnings.dropna()  
@@ -187,7 +187,7 @@ def update_price():
         print "Technical_points done: ", i
     final_update= final_update.dropna()
 
-    final_update.to_csv("final_update.csv")
+    final_update.to_csv("file/final_update.csv")
     #***************************************
 
     # get result
@@ -201,3 +201,8 @@ def update_price():
         result = result.append(final_update.groupby("Sector").get_group(i).sort_values("Technical_points").iloc[-1])
 
     result.to_csv("Trade_suggestion" + str(result.TimeStamp)[0:10]+".csv")
+
+
+
+if __name__  == "__main__":
+	update_price()
