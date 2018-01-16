@@ -247,11 +247,11 @@ class get_robinhood:
 	def place_buy_bulk_checkup(self, ticker_list, quantity_list ):
 		my_positions = self.get_my_positions()[0]
 		for t, q in zip(ticker_list, quantity_list):
-			if t in my_positions:
+			if t not in my_positions:
 				self.place_buy(t,q)
 
-	def place_sell_bulk_nocheck(self, ticker_list, quantity_list ):
+	def place_buy_bulk_nocheck(self, ticker_list, quantity_list ):
 		my_positions = self.get_my_positions()[0]
 		for t, q in zip(ticker_list, quantity_list):
-				self.place_sell(t,q)
+				self.place_buy(t,q)
 
