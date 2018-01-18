@@ -31,8 +31,12 @@ def beta(ticker_list,bench = "SPY", interval="day"):
 		ben_mark = robinhood.get_historical(bench,interval="10minute",span = "week")
 		ben_mark=ben_mark.rename(columns ={"close_price":bench})
 		ben_mark[bench]=ben_mark[bench].astype(float)
+		ben_mark.index = ben_mark.begins_at
+	ben_mark[bench + "_bench_re"] = log(ben_mark[bench]/ben_mark[bench].shift(1))
 	for i in list(ticker_list):
-		ticker = i
+
+		new=[]
+		ticker = str(i)
 		try:
 			if interval =="day":
 
@@ -42,23 +46,20 @@ def beta(ticker_list,bench = "SPY", interval="day"):
 				stock= robinhood.get_historical(ticker,interval="10minute",span = "week")
 				stock=stock.rename(columns ={"close_price":ticker})
 				stock[ticker] = stock[ticker].astype(float)
+				stock.index = stock.begins_at
 		except:
 			print (str(i)+" ticker maybe wrong. Error in getting data")
 			betas.append(np.NaN)
 			continue
 
 		# get return and put them in a new dataframe
-
 		
-		
-		ben_mark[bench + "_re"] = log(ben_mark[bench]/ben_mark[bench].shift(1))
-		stock[ticker + "_re"] = log(stock[ticker]/stock[ticker].shift(1))
+		stock[ticker + "_stock_re"] = log(stock[ticker]/stock[ticker].shift(1))
 		new = pd.concat([ben_mark,stock],axis =1)
-		new = new[[bench,bench + "_re",ticker, ticker + "_re" ]]
+		new = new[[bench,bench + "_bench_re",ticker, ticker + "_stock_re" ]]
 		new = new.dropna()
-
 		#calculate beta using covariance matrix
-		covmat = np.cov(new[bench + "_re"],new[ticker + "_re"])
+		covmat = np.cov(new[bench + "_bench_re"],new[ticker + "_stock_re"])
 		beta = covmat[0,1]/  np.sqrt(covmat[1,1]*covmat[0,0])
 		betas.append(beta)
 	betas = pd.DataFrame(betas)
@@ -245,6 +246,8 @@ class get_robinhood:
 		betas = pd.DataFrame(betas[0])
 		data = pd.concat([betas,quantity],axis=1)
 		data = data.fillna(0)
+		for i in data.index:
+			data.loc[data.index == i,"last_price"]=self.quote_data(i)["last_trade_price"]
 		sum_beta=np.dot(data.Beta,data.Quantity)
 		print sum_beta
 		print data
@@ -253,11 +256,16 @@ class get_robinhood:
 	def get_my_position_beta_minute(self):
 		stocks, quantity =self.get_my_positions()
 		quantity = pd.DataFrame(quantity,index = stocks,columns=["Quantity"])
-		betas = beta(stocks,interval="minute")
-		betas = pd.DataFrame(betas[0])
+		betas = beta(stocks,interval="minute")[0]
+		#betas = pd.DataFrame(betas[0])
 		data = pd.concat([betas,quantity],axis=1)
 		data = data.fillna(0)
-		sum_beta=np.dot(data.Beta,data.Quantity)
+		data["Last_price"]=np.NaN
+		for i in data.index:
+			data.loc[data.index == i,"Last_price"]=self.my_trader.quote_data(i)["last_trade_price"]
+		data.Last_price = data.Last_price.astype(float)
+		data["Weight"] = data.Last_price * data.Quantity/np.dot(data.Last_price,data.Quantity)
+		sum_beta=np.dot(data.Beta,data.Weight)
 		print sum_beta
 		print data
 		return sum_beta,data

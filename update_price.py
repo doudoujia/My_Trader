@@ -200,7 +200,7 @@ def update_price():
         print final_update.groupby("Sector").get_group(i).sort_values("Technical_points").iloc[-1].name
         result = result.append(final_update.groupby("Sector").get_group(i).sort_values("Technical_points").iloc[-1])
 
-    result.to_csv("Trade_suggestion" + str(result.TimeStamp)[0:10]+".csv")
+    result.to_csv("file/Trade_suggestion" + str(result.TimeStamp[0])+".csv")
 
 
 
