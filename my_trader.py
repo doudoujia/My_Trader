@@ -23,6 +23,7 @@ def beta(ticker_list,bench = "SPY", interval="day"):
 	# will return a dataframe
 	robinhood = get_robinhood()
 	betas = []
+	volos = []
 	ben_mark=pd.DataFrame()
 	if interval == "day":
 		ben_mark= da.DataReader(bench,"yahoo",datetime.now()-timedelta(days=90),datetime.now())
@@ -61,11 +62,13 @@ def beta(ticker_list,bench = "SPY", interval="day"):
 		#calculate beta using covariance matrix
 		covmat = np.cov(new[bench + "_bench_re"],new[ticker + "_stock_re"])
 		beta = covmat[0,1]/  np.sqrt(covmat[1,1]*covmat[0,0])
+		volotity = sqrt(covmat[1,1])
 		betas.append(beta)
+		volos.append(volotity)
 	betas = pd.DataFrame(betas)
 	betas.index = ticker_list
 	betas.columns=["Beta"]
-	return betas, covmat
+	return betas, covmat, volos
 
 class get_robinhood:
 
@@ -243,11 +246,13 @@ class get_robinhood:
 		stocks, quantity =self.get_my_positions()
 		quantity = pd.DataFrame(quantity,index = stocks,columns=["Quantity"])
 		betas = beta(stocks)
-		betas = pd.DataFrame(betas[0])
-		data = pd.concat([betas,quantity],axis=1)
+		#betas = pd.DataFrame(betas[0])
+		data = pd.concat([betas[0],quantity],axis=1)
 		data = data.fillna(0)
 		for i in data.index:
-			data.loc[data.index == i,"last_price"]=self.quote_data(i)["last_trade_price"]
+			data.loc[data.index == i,"last_price"]=self.my_trader.quote_data(i)["last_trade_price"]
+		data["Volotity"] = sqrt(betas[2])
+		data["Weight"] = data.Last_price * data.Quantity/np.dot(data.Last_price,data.Quantity)
 		sum_beta=np.dot(data.Beta,data.Quantity)
 		print sum_beta
 		print data
@@ -256,20 +261,21 @@ class get_robinhood:
 	def get_my_position_beta_minute(self):
 		stocks, quantity =self.get_my_positions()
 		quantity = pd.DataFrame(quantity,index = stocks,columns=["Quantity"])
-		betas = beta(stocks,interval="minute")[0]
+		betas = beta(stocks,interval="minute")
 		#betas = pd.DataFrame(betas[0])
-		data = pd.concat([betas,quantity],axis=1)
+		data = pd.concat([betas[0],quantity],axis=1)
 		data = data.fillna(0)
 		data["Last_price"]=np.NaN
 		for i in data.index:
 			data.loc[data.index == i,"Last_price"]=self.my_trader.quote_data(i)["last_trade_price"]
 		data.Last_price = data.Last_price.astype(float)
+		data["Volotity"] = sqrt(betas[2])
 		data["Weight"] = data.Last_price * data.Quantity/np.dot(data.Last_price,data.Quantity)
 		sum_beta=np.dot(data.Beta,data.Weight)
 		print sum_beta
 		print data
 		return sum_beta,data
-	#def get_my_position_chart (TODO)
+	
 
 
 

@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pprint
 from my_lib import *
+from my_trader import *
 
 
 
@@ -30,14 +31,21 @@ def mean_reversion(stock,ival):
 
 	elif ival == "minute":
 		robinhood = get_robinhood()
-
 	# use robinhood data for 10 minute interval
 		st_price = robinhood.get_historical(stock,interval="10minute",span="week")
-
+		st_price.index = st_price.begins_at
+		st_price = st_price.drop(["begins_at","session","interpolated"],axis=1)
+		for j in st_price.columns:
+			st_price[j] = st_price[j].astype(float)
+		st_price = st_price.rename(columns={"close_price":"Close"})
+		ival = "10_minute"
 	else:
 		raise "interval not support yet"
 
 
+
+	print ("***********************************************")
+	print ("**********" + str(stock) + "*******************")
 
 	#***************************************
 
@@ -65,12 +73,14 @@ def mean_reversion(stock,ival):
 
 	'''
 
+	if cadf[1] > 0.05:
+		cadf_interpret = "Augmented Dickey Fuller: Not significant"
+	
+	elif cadf[1] < 0.05 and (abs(cadf[0]) < abs(cadf[4]['1%']) or abs(cadf[0]) < abs(cadf[4]['10%']) or abs(cadf[0]) < abs(cadf[4]['5%'])):
 
-	if cadf[1] < 0.05 and (abs(cadf[0]) < abs(cadf[4]['1%']) or abs(cadf[0]) < abs(cadf[4]['10%']) or abs(cadf[0]) < abs(cadf[4]['5%'])):
-
-		cadf_interpret = True
+		cadf_interpret = "Augmented Dickey Fuller: unit root"
 	else:
-		cadf_interpret = False
+		cadf_interpret = "Augmented Dickey Fuller: NO unit root"
 
 	result.append(cadf_interpret)
 
@@ -96,12 +106,17 @@ def mean_reversion(stock,ival):
 	 
 	# Return the Hurst exponent from the polyfit output
 
-
+	H= round(poly[0]*2.0,2)
 	# print the result
-	print "Hurst Exponent =",round(poly[0]*2.0,2)
-	result.append(round(poly[0]*2.0,2))
+	print "Hurst Exponent =", H
 
-	
+	if H <0.5:
+		result.append("mean reverting")
+	elif H == 0.5:
+		result.append("Geometric Brownian Motion")
+	elif H >0.5:
+		result.append("trending")
+		
 	#H < 0.5  The time series is mean reverting 
 	#H = 0.5  The time series is a Geometric Brownian Motion 
 	#H > 0.5  The time series is trending
@@ -133,9 +148,12 @@ def mean_reversion(stock,ival):
 	halflife = round(-np.log(2) / res.params[1],0)
 	 
 	print  'Halflife = ', halflife
+	print ("\n")
 
-	return result.append(halflife)
-
+	result.append("Halflife: "+str(halflife)+ " "+str(ival))
+	print result
+	print ("***********************************************")
+	return 	result
 
 def moving_cross_backtest_day(stock, short_ma, long_ma,X = 10):
     #read in data from Yahoo Finance for the relevant ticker
@@ -295,8 +313,9 @@ def plot_position(tickers, quantity):
         temp = temp.rename(columns={"Low":str(i) + "_Low"})
         data = pd.concat([data,temp[[str(i) + "_Close",str(i) + "_High",str(i) + "_Low"]]], axis=1)
     data_weighted = pd.DataFrame(index = data.index)
-    for i, j in zip(data.columns,range(len(data)*3)):
-        j = j % 3
+    for i, j in zip(data.columns,range(len(data.columns))):
+        #j = int(np.ceil(j / 3))
+        j = j/3
         data_weighted = pd.concat([data_weighted,data[i] * quantity[j]],axis=1)
     data_weighted["Sum_Close"] = data_weighted.filter(regex="Close").sum(axis=1)
     data_weighted["Sum_High"] = data_weighted.filter(regex="High").sum(axis=1)
@@ -318,4 +337,5 @@ def plot_position(tickers, quantity):
     data_weighted.STOCH_slowk.plot()
 
     plt.show()
+    print data_weighted.head()
 	
