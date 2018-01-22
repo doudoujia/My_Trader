@@ -646,7 +646,12 @@ def update_fundamentals():
     print  runtime
 
 
+#################################################################
 
+
+
+
+#################################################################
 
 
 
@@ -818,25 +823,25 @@ def update_price_ondemand(interval = 1, freq = 'minutes',end_data=datetime.now()
         print final_update.groupby("Sector").get_group(i).sort_values("Technical_points").iloc[-1].name
         result = result.append(final_update.groupby("Sector").get_group(i).sort_values("Technical_points").iloc[-1])
 
-    result.to_csv("file/Trade_suggestion_minute_1st" + str(result.TimeStamp[0]).replace(":","-")+".csv")
+    # result.to_csv("file/Trade_suggestion_minute_1st" + str(result.TimeStamp[0]).replace(":","-")+".csv")
 
-    result = pd.DataFrame()
-    for i in set(final_update.Sector):
-        print i
-        print final_update.groupby("Sector").get_group(i).sort_values("Technical_points").iloc[-2].name
-        result = result.append(final_update.groupby("Sector").get_group(i).sort_values("Technical_points").iloc[-2])
+    # result = pd.DataFrame()
+    # for i in set(final_update.Sector):
+    #     print i
+    #     print final_update.groupby("Sector").get_group(i).sort_values("Technical_points").iloc[-2].name
+    #     result = result.append(final_update.groupby("Sector").get_group(i).sort_values("Technical_points").iloc[-2])
 
-    result.to_csv("file/Trade_suggestion_minute_2nd" + str(result.TimeStamp[0]).replace(":","-")+".csv")
+    # result.to_csv("file/Trade_suggestion_minute_2nd" + str(result.TimeStamp[0]).replace(":","-")+".csv")
 
-    result = pd.DataFrame()
-    for i in set(final_update.Sector):
-        print i
-        print final_update.groupby("Sector").get_group(i).sort_values("Technical_points").iloc[-3].name
-        result = result.append(final_update.groupby("Sector").get_group(i).sort_values("Technical_points").iloc[-3])
+    # result = pd.DataFrame()
+    # for i in set(final_update.Sector):
+    #     print i
+    #     print final_update.groupby("Sector").get_group(i).sort_values("Technical_points").iloc[-3].name
+    #     result = result.append(final_update.groupby("Sector").get_group(i).sort_values("Technical_points").iloc[-3])
 
-    result.to_csv("file/Trade_suggestion_minute_3rd" + str(result.TimeStamp[0]).replace(":","-")+".csv")
+    # result.to_csv("file/Trade_suggestion_minute_3rd" + str(result.TimeStamp[0]).replace(":","-")+".csv")
 
-
+    return result
 
 
 
