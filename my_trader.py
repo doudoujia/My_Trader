@@ -19,6 +19,26 @@ import seaborn as sns
 import pprint
 from datetime import timedelta
 
+
+def get_ondemand_data(sym, interval = 1,freq = 'minutes' ,start_date=(datetime.now()-timedelta(days=10))\
+                    ,end_date=datetime.now()):
+
+    api_key = 'b59b144a62e058b6c4e265c049dc679f'
+    start_date=start_date.strftime("%Y%m%d%H%M%S")
+    end_date=end_date.strftime("%Y%m%d%H%M%S")
+    # This is the required format for datetimes to access the API
+
+    api_url = 'http://marketdata.websol.barchart.com/getHistory.csv?' + \
+                            'key={}&symbol={}&type={}&startDate={}&endDate={}&interval={}'\
+                             .format(api_key, sym, freq, start_date,end_date,interval)
+
+    csvfile = pd.read_csv(api_url, parse_dates=['timestamp'])
+    csvfile.set_index('timestamp', inplace=True)
+            
+    return csvfile
+
+
+
 def beta(ticker_list,bench = "SPY", interval="day"):    
 	# will return a dataframe
 	robinhood = get_robinhood()
@@ -154,7 +174,7 @@ class get_robinhood:
 
 		quote = DataFrame(quote,index=[stock])
 
-		return quote	
+		return quote    
 
 
 	def get_current_price(self,stock):
@@ -278,10 +298,6 @@ class get_robinhood:
 	
 
 
-
-
-
-
 	def place_buy_bulk_checkup(self, ticker_list, quantity_list ):
 		my_positions = self.get_my_positions()[0]
 		for t, q in zip(ticker_list, quantity_list):
@@ -292,4 +308,34 @@ class get_robinhood:
 		my_positions = self.get_my_positions()[0]
 		for t, q in zip(ticker_list, quantity_list):
 				self.place_buy(t,q)
+
+	def get_protfolio(tickers,quantity):
+		temp = da.DataReader(tickers[0],"yahoo",datetime.now()-timedelta(days=90),datetime.now())
+		data = pd.DataFrame(index=temp.index)
+		temp = temp.rename(columns={"Adj Close":str(tickers[0]) + "_Close"})
+		temp = temp.rename(columns={"High":str(tickers[0]) + "_High"})
+		temp = temp.rename(columns={"Low":str(tickers[0]) + "_Low"})
+		temp = temp.rename(columns={"Open":str(tickers[0]) + "_Open"})
+		data = pd.concat([data,temp[[str(tickers[0]) + "_Close",str(tickers[0]) + "_High",str(tickers[0]) + "_Low",str(tickers[0]) + "_Open"]]], axis=1)
+		for i in tickers[1:]:
+			temp = da.DataReader(i,"yahoo",datetime.now()-timedelta(days=90),datetime.now())
+			temp = temp.rename(columns={"Adj Close":str(i) + "_Close"})
+			temp = temp.rename(columns={"High":str(i) + "_High"})
+			temp = temp.rename(columns={"Low":str(i) + "_Low"})
+			temp = temp.rename(columns={"Open":str(i) + "_Open"})
+			data = pd.concat([data,temp[[str(i) + "_Close",str(i) + "_High",str(i) + "_Low",str(i) + "_Open"]]], axis=1)
+		data_weighted = pd.DataFrame(index = data.index)
+		for i, j in zip(data.columns,range(len(data.columns))):
+			#j = int(np.ceil(j / 3))
+			j = j/4
+			data_weighted = pd.concat([data_weighted,data[i] * quantity[j]],axis=1)
+		data_weighted["Sum_Close"] = data_weighted.filter(regex="Close").sum(axis=1)
+		data_weighted["Sum_High"] = data_weighted.filter(regex="High").sum(axis=1)
+		data_weighted["Sum_Low"] = data_weighted.filter(regex="Low").sum(axis=1)
+		data_weighted["Sum_Open"] = data_weighted.filter(regex="Open").sum(axis=1)
+		#one day trade backtest
+		data_weighted["intraday_return"] = data_weighted.Sum_Close - data_weighted.Sum_Open.shift(1)
+		data_weighted["intraday_return_prt"] = (data_weighted.Sum_Close - data_weighted.Sum_Open.shift(1))/data_weighted.Sum_Close
+
+		return data_weighted
 
