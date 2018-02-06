@@ -29,29 +29,131 @@ working_suggestion = "Trade_suggestion_minute_1st"
 universe_file_name = "cantrade_1000.csv"
 
 
-
-
-def get_ondemand_data(sym, interval = 1,freq = 'minutes' ,start_date=(datetime.now()-timedelta(days=10))\
+def get_price_data(tic_list,method,interval = 1, freq = 'minutes',start_date = datetime.now()-timedelta(days =90),end_date=datetime.now()):
+    
+    def get_ondemand_data(sym, interval = 1,freq = 'minutes' ,start_date=(datetime.now()-timedelta(days=10))\
                     ,end_date=datetime.now()):
 
-    try:
+        try:
 
-        api_key = 'b59b144a62e058b6c4e265c049dc679f'
-        start_date=start_date.strftime("%Y%m%d%H%M%S")
-        end_date=end_date.strftime("%Y%m%d%H%M%S")
-        # This is the required format for datetimes to access the API
+            api_key = 'b59b144a62e058b6c4e265c049dc679f'
+            start_date=start_date.strftime("%Y%m%d%H%M%S")
+            end_date=end_date.strftime("%Y%m%d%H%M%S")
+            # This is the required format for datetimes to access the API
 
-        api_url = 'http://marketdata.websol.barchart.com/getHistory.csv?' + \
-                                'key={}&symbol={}&type={}&startDate={}&endDate={}&interval={}'\
-                                 .format(api_key, sym, freq, start_date,end_date,interval)
+            api_url = 'http://marketdata.websol.barchart.com/getHistory.csv?' + \
+                                    'key={}&symbol={}&type={}&startDate={}&endDate={}&interval={}'\
+                                     .format(api_key, sym, freq, start_date,end_date,interval)
 
-        csvfile = pd.read_csv(api_url, parse_dates=['timestamp'])
-        csvfile.set_index('timestamp', inplace=True)
+            csvfile = pd.read_csv(api_url, parse_dates=['timestamp'])
+            csvfile.set_index('timestamp', inplace=True)
 
-        return csvfile
-                
-    except Exception as e:
-        print e
+            return csvfile
+                    
+        except Exception as e:
+            print e
+    
+    error = []
+    price = pd.DataFrame()
+    if method == "robinhood":
+        robinhood = get_robinhood()
+        save_file_name = "Trade_suggestion_robinhood"
+        for i in tic_list:
+            trial = 0
+            while trial <3:
+                try:
+                    temp = robinhood.get_historical(i,interval="10minute",span = "week")
+                    #temp.index = temp.begins_at
+                    temp = temp.drop(["session","interpolated"],axis=1)
+                    for j in temp.columns[1:]:
+                        temp[j] = temp[j].astype(float)
+                   # index= pd.MultiIndex.from_product([[i],temp.index])
+                    temp["Ticker"] = np.repeat(i,len(temp))
+                    price = price.append(temp)
+
+                    print "Finished", i 
+                    #time.sleep(5)
+                    trial=3
+
+                except:
+                    print "error occorded in getting yahool historicals for ", i
+                    trial +=1
+                    if trial == 3:
+                        error.append([i,'get_yahoo_historicals'])
+        # get rid of the multiindex 
+       # price.to_csv("file/temp.csv")
+       # price = pd.read_csv("file/temp.csv")
+
+        price = price.reset_index()
+        price["Close"] = price["close_price"]
+        price = price.rename(columns={'begins_at':"TimeStamp","high_price":"High","low_price":"Low","open_price":"Open","volume":"Volume"})
+        price["Return"]= price.Close.diff(1)/price.Close
+
+
+    elif method == "ondemand":
+
+
+        #freq = minutes, daily
+        save_file_name = "Trade_suggestion_ondemand"
+        for i in tic_list:
+            trial = 0
+            while trial <3:
+                try:
+                    temp = get_ondemand_data(i, interval = interval , freq = freq,start_date = start_date, end_date = end_date)
+
+                    #index= pd.MultiIndex.from_product([[i],temp.index])
+                    #temp=pd.DataFrame(data=temp.values,index=index,columns=temp.columns)
+                    
+                    price = price.append(temp)
+
+                    print "Finished", i 
+                    #time.sleep(5)
+                    trial=3
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+                except:
+                    print "error occorded in getting yahool historicals for ", i
+                    trial +=1
+                    if trial == 3:
+                        error.append([i,'get_yahoo_historicals'])
+
+
+        price = price.reset_index()
+        price["Close"] = price["close"]
+        price = price.rename(columns={'symbol':'Ticker','timestamp':"TimeStamp","high":"High","low":"Low","open":"Open","volume":"Volume"})
+        price["Return"]= price.Close.diff(1)/price.Close
+    
+    elif method == "day":
+        save_file_name = "Trade_suggestion_day"
+        for i in tic_list:
+            trial = 0
+            while trial <3:
+                try:
+                    temp = da.DataReader(i,"yahoo",start_date ,end_date)
+                    index= pd.MultiIndex.from_product([[i],temp.index])
+                    temp=pd.DataFrame(data=temp.values,index=index,columns=temp.columns)
+                    price = price.append(temp)
+
+                    print "Finished", i 
+                    #time.sleep(5)
+                    trial=3
+
+                except Exception as e:
+                    print e
+                    print "error occorded in getting yahool historicals for ", i
+                    trial +=1
+                    if trial == 3:
+                        error.append([i,'get_yahoo_historicals'])
+        # get rid of the multiindex 
+        price = price.reset_index()
+
+        
+        price.Close = price["Adj Close"]
+        price = price.rename(columns={'level_0':'Ticker','level_1':"TimeStamp"})
+        price["Return"]= price.Close.diff(1)/price.Close
+        
+    return price
+
+
 #
 #def hedge(self,hedge_int = "UVXY"):
 #    robinhood = get_robinhood()
