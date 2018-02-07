@@ -57,7 +57,7 @@ def get_price_data(tic_list,method,interval = 1, freq = 'minutes',start_date = d
     price = pd.DataFrame()
     if method == "robinhood":
         robinhood = get_robinhood()
-        save_file_name = "Trade_suggestion_robinhood"
+        
         for i in tic_list:
             trial = 0
             while trial <3:
@@ -150,7 +150,7 @@ def get_price_data(tic_list,method,interval = 1, freq = 'minutes',start_date = d
         price.Close = price["Adj Close"]
         price = price.rename(columns={'level_0':'Ticker','level_1':"TimeStamp"})
         price["Return"]= price.Close.diff(1)/price.Close
-        
+    #price = price.dropna()
     return price
 
 
