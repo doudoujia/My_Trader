@@ -128,9 +128,8 @@ class bot:
 
 
     def place_my_order_check(self):
-       # robinhood = get_robinhood()
-        #robinhood.logout()
-        #robinhood.login("lgyhz123","5093945464lgyhz")
+
+
         
         get_stock = False
         place_order = False
@@ -177,8 +176,7 @@ class bot:
         
     def sell_previous_day(self):
         #robinhood = get_robinhood()
-        #robinhood.logout()
-       # robinhood.my_trader.login("lgyhz123","5093945464lgyhz")
+
         sell= False
         trail = 0
         while not sell and trail <3:
@@ -208,8 +206,7 @@ class bot:
 
     def check_beta(self):
        # robinhood = get_robinhood()
-        #robinhood.logout()
-        #robinhood.login("lgyhz123","5093945464lgyhz")
+
         check= False
         trail =0
         while not check and trail <3:
@@ -239,13 +236,10 @@ class bot:
                  print (e);
                  trail += 1
                  continue
-       # robinhood.login("lgyhz123","5093945464lgyhz")
 
-        #robinhood.logout()
 
     def plot(self):
-        #robinhood = get_robinhood()
-      #  robinhood.login("lgyhz123","5093945464lgyhz")
+
          flag = False
          trail = 0
          while not flag and trail < 3:
