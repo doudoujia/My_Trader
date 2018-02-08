@@ -87,10 +87,12 @@ class bot:
 
 
 
+
+
+
     def place_my_order_check(self):
        # robinhood = get_robinhood()
-        #robinhood.logout()
-        #robinhood.login("lgyhz123","5093945464lgyhz")
+
         
         get_stock = False
         place_order = False
@@ -134,8 +136,7 @@ class bot:
 
     def check_beta(self):
        # robinhood = get_robinhood()
-        #robinhood.logout()
-        #robinhood.login("lgyhz123","5093945464lgyhz")
+  
         check= False
         trail =0
         while not check and trail <3:
