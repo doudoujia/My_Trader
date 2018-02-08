@@ -25,8 +25,16 @@ directory = "file/"
 working_suggestion = "Trade_suggestion_robinhood_1st"
 stock_suggestion_path = directory + working_suggestion + str(datetime.now()-timedelta(days=last_trade_date_count))[0:10]+".csv"
 
+stock1 = 
+stock2 = 
+
+trade_window = 
 
 
+initial_capital = 
+
+
+continuous_adjust = True
 #Template
 
 # =============================================================================
@@ -88,41 +96,35 @@ class bot:
 
 
 
+    def get_trading_action(self):
+        positions = robinhood.get_my_positions()
+        positions = pd.DataFrame(data=positions[1],index = positions[0],columns=["Quantity"])
+        if stock1 in positions.index:
+            print ("{} in my position".format(stock1))
+            stock1_quant = positions.loc[stock1]
+        else:
+            stock1_quant = 0
+
+        if stock2 in positions.index:
+            stock2_quant = positions.loc[stock2]
+        else:
+            stock2_quant = 0
+        price_table = pair_trade(stock1,stock2,initial_capital, window = trade_window, continuous=continuous_adjust)
+        price_table = price_table.iloc[-1]
+        if not continuous_adjust:
+            if price_table.trade:
+                print ("Trade Day!\n")
+                stock1_trade = price_table
+                stock2_trade = 
+            else:
+                print ("No trade signal\n")
+        else:
+            stock1_trade = 
+    
+
+    def intraday_trade(self):
 
 
-    def place_my_order_check(self):
-       # robinhood = get_robinhood()
-
-        
-        get_stock = False
-        place_order = False
-        trail = 0
-        while (not get_stock and not place_order) and trail < 3:
-            try:
-                my_stock = pd.read_csv(stock_suggestion_path)
-                my_stock = my_stock.rename(columns={"Unnamed: 0":"Ticker"})
-                print ("Get suggestion succeed!")
-                get_stock=True
-            except:
-                print ("Get suggestion fail, stopping")
-                trail += 1
-                continue
-            try:
-                my_stock["position_place_quantity"]= np.ceil(((100/len(my_stock.Close))/my_stock.Close))
-                power = self.robinhood.get_buying_power()
-                self.robinhood.place_buy_bulk_checkup(my_stock.Ticker, my_stock.position_place_quantity)
-                if np.dot(my_stock.position_place_quantity,my_stock.Close) < power:
-                    print ("Enough buying power")
-                    self.robinhood.place_buy_bulk_checkup(my_stock.Ticker, my_stock.position_place_quantity)
-                    place_order = True
-                else:
-                    print ("Not enough buying power")
-                    raise
-            except Exception, e:
-                print e
-                trail += 1
-
-        
     def sell_and_buy(self):
         self.place_my_order_check()
         hedge_int = "SH"
