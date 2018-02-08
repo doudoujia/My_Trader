@@ -449,7 +449,7 @@ def pair_trade(stock1, stock2,initial,method = "day",window = 30,data_len = 210,
     price_table["relative_mv"] = price_table["relative"].rolling(window).mean()
 
     price_table.relative.loc[price_table.relative==-np.inf]=price_table.relative.shift(1)
-
+    price_table.relative.loc[price_table.relative==-np.NaN]=price_table.relative.shift(1)
     #price_table["relative_mv"]=price_table[stock1+"_log_ret_mv"]/price_table[stock2+"_log_ret_mv"]
     price_table["z_score"] =( price_table["relative"]-price_table["relative_mv"])/price_table.relative.std()
     price_table["trade"]=0
