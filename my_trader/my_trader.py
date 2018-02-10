@@ -26,7 +26,7 @@ from scipy import stats
 
 directory = "file/"
 working_suggestion = "Trade_suggestion_minute_1st"
-universe_file_name = "cantrade_1000.csv"
+universe_file_name = "my_universe_industry_sector_marketcap_earnings.csv"
 
 
 def get_price_data(tic_list,method,interval = 1, freq = 'minutes',start_date = datetime.now()-timedelta(days =90),end_date=datetime.now()):
