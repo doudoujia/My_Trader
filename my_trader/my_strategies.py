@@ -424,7 +424,6 @@ def pair_trade(stock1, stock2,initial,method = "day",window = 30,data_len = 210,
     # stock1 = "VIXY"
     # stock2 = "SPY"
     print ("Rolling window = {}, Backtest length= {}".format(window,data_len))
-    print ("Rolling window = {}, Backtest length= {}".format(window,data_len))
     
     while not get_succeed and trial < 5:
         try:

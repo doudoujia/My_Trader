@@ -78,6 +78,7 @@ def get_price_data(tic_list,method,interval = 1, freq = 'minutes',start_date = d
                 except:
                     print "error occorded in getting yahool historicals for ", i
                     trial +=1
+                    time.sleep(10)
                     if trial == 3:
                         error.append([i,'get_yahoo_historicals'])
         # get rid of the multiindex 
@@ -113,6 +114,7 @@ def get_price_data(tic_list,method,interval = 1, freq = 'minutes',start_date = d
                 except:
                     print "error occorded in getting yahool historicals for ", i
                     trial +=1
+                    time.sleep(10)
                     if trial == 3:
                         error.append([i,'get_yahoo_historicals'])
 
@@ -144,6 +146,7 @@ def get_price_data(tic_list,method,interval = 1, freq = 'minutes',start_date = d
                     print e
                     print "error occorded in getting yahool historicals for ", i
                     trial +=1
+                    time.sleep(10)
                     if trial == 3:
                         error.append([i,'get_yahoo_historicals'])
         # get rid of the multiindex 

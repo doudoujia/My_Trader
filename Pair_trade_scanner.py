@@ -20,12 +20,12 @@ from my_trader import *
 
 def complete_line(pct):
     graph = "->"
-    pct *100
+    pct *=100
     line_pct = np.ceil(pct/5)
     for i in range(int(line_pct)):
         graph += "->"
 #    print (graph + "  " + str(pct) + "%")
-    print (graph + "{0:>10}%".format(pct))
+    print (graph + "{0:>100.2f}%".format(pct))
     
         
 
@@ -43,7 +43,7 @@ res_sharp_ratio=[]
 pairs=[]
 for i in tradeable.Ticker:
      start_point+=1    
-    for j in tradeable.Ticker:
+     for j in tradeable.Ticker:
         
         count +=1
         if i==j:
@@ -82,7 +82,7 @@ for i in tradeable.Ticker:
                 print e    
                 continue
         complete_line(float(count)/(len(tradeable)*len(tradeable)))
- final = pd.DataFrame({"pairs":pairs,"total_return":res_total_return,\
+final = pd.DataFrame({"pairs":pairs,"total_return":res_total_return,\
     "ave_return":res_ave_return,"volatility":res_volatility,\
     "sharp_ratio":res_sharp_ratio})
 stop = timeit.default_timer()

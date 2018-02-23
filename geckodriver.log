@@ -1,0 +1,25 @@
+1518791401034	geckodriver	INFO	geckodriver 0.19.1
+1518791401065	geckodriver	INFO	Listening on 127.0.0.1:64497
+1518791404128	mozrunner::runner	INFO	Running command: "C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe" "-marionette" "-profile" "C:\\Users\\gli26\\AppData\\Local\\Temp\\rust_mozprofile.YCo5UtnZWPUG"
+1518791411376	Marionette	INFO	Listening on port 64512
+1518791411808	Marionette	WARN	TLS certificate errors will be ignored for this session
+JavaScript error: https://my.ucdavis.edu/myucd/js/myucd.usage.js?v=20170421150640, line 324: ReferenceError: returnedConfiguration is not defined
+JavaScript error: https://my.ucdavis.edu/grid1/js/myucd.module.js?v=20170622130627, line 914: TypeError: this.error is not a function
+JavaScript warning: https://my.ucdavis.edu/l/saot-schedulebuilder/v1.7/l/schedulebuilder.min.js?v=201710211831, line 1: unreachable code after return statement
+*************************
+A coding exception was thrown and uncaught in a Task.
+
+Full message: TypeError: NetworkError when attempting to fetch resource.
+Full stack: 
+*************************
+JavaScript error: resource://gre/components/nsUrlClassifierListManager.js, line 287: NS_ERROR_NOT_INITIALIZED: Component returned failure code: 0xc1f30001 (NS_ERROR_NOT_INITIALIZED) [nsIUrlClassifierDBService.getTables]
+JavaScript error: resource://gre/components/nsUrlClassifierListManager.js, line 287: NS_ERROR_NOT_INITIALIZED: Component returned failure code: 0xc1f30001 (NS_ERROR_NOT_INITIALIZED) [nsIUrlClassifierDBService.getTables]
+1518801263601	Marionette	INFO	Ceased listening
+1518792720969	geckodriver::marionette	ERROR	Failed to kill browser process
+UrlClassifierListManager.js, line 287: NS_ERROR_NOT_INITIALIZED: Component returned failure code: 0xc1f30001 (NS_ERROR_NOT_INITIALIZED) [nsIUrlClassifierDBService.getTables]
+1518682485841	Marionette	INFO	Ceased listening
+m%3Fredirect%3DaHR0cHM6Ly9teS51Y2RhdmlzLmVkdS8%2Fdmlld05ldw%3D%3D, line 1: ReferenceError: checkUsername is not defined
+JavaScript warning: https://my.ucdavis.edu/l/saot-schedulebuilder/v1.7/l/schedulebuilder.min.js?v=201710211831, line 1: unreachable code after return statement
+JavaScript error: resource://gre/components/nsUrlClassifierListManager.js, line 287: NS_ERROR_NOT_INITIALIZED: Component returned failure code: 0xc1f30001 (NS_ERROR_NOT_INITIALIZED) [nsIUrlClassifierDBService.getTables]
+JavaScript error: resource://gre/components/nsUrlClassifierListManager.js, line 287: NS_ERROR_NOT_INITIALIZED: Component returned failure code: 0xc1f30001 (NS_ERROR_NOT_INITIALIZED) [nsIUrlClassifierDBService.getTables]
+1518682371617	Marionette	INFO	Ceased listening

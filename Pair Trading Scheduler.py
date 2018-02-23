@@ -126,57 +126,64 @@ class bot:
         get_success=False
         trial = 0
         while not get_success and trial < 3:
-            positions = self.robinhood.get_my_positions()
-            positions = pd.DataFrame(data=positions[1],index = positions[0],columns=["Quantity"])
-            if stock1 and stock2 in positions.index:
-                print ("{}, {} in my position".format(stock1,stock2))
-                stock1_quant = positions.loc[stock1][0]
-                stock2_quant = positions.loc[stock2][0]
-                trade_on = True
-            else:
-                stock1_quant = 0
-                stock2_quant = 0
-                trade_on = False
-    
-    
-            price_table = pair_trade(stock1,stock2,initial_capital, window = trade_window, continuous=continuous_adjust)
-            price_table = price_table.iloc[-1]
-            volatility1 = price_table[stock1 + "_volatility"]
-            volatility2 = price_table[stock2 + "_volatility"]
-            print (volatility1)
-            print (volatility2)
-            
-                
-            if not continuous_adjust:
-                print ("Trade on signal")
-                if price_table["trade"]:
-                    print ("Trade Day!\n")
-                    stock1_trade = price_table[stock1 + "_shares"]
-                    stock2_trade = price_table[stock2 + "_shares"]
+            try:
+                positions = self.robinhood.get_my_positions()
+                positions = pd.DataFrame(data=positions[1],index = positions[0],columns=["Quantity"])
+                if stock1 and stock2 in positions.index:
+                    print ("{}, {} in my position".format(stock1,stock2))
+                    stock1_quant = positions.loc[stock1][0]
+                    stock2_quant = positions.loc[stock2][0]
+                    trade_on = True
                 else:
-                    print ("No trade signal\n")
-            else:
-                print ("Dynamic hedge!")
-                stock1_trade = price_table[stock1 + "_suggest_shares"]
-                stock2_trade = price_table[stock2 + "_suggest_shares"]
-    
-    
-            stock1_trade = stock1_trade - stock1_quant
-            stock2_trade = stock2_trade - stock2_quant
-            if ( stock1_trade != stock1_trade ) or ( stock2_trade != stock2_trade ):
-                self.problem = True
-                print ("pair trade function problem")
+                    stock1_quant = 0
+                    stock2_quant = 0
+                    trade_on = False
+        
+        
+                price_table = pair_trade(stock1,stock2,initial_capital, window = trade_window, continuous=continuous_adjust)
+                price_table = price_table.iloc[-1]
+                volatility1 = price_table[stock1 + "_volatility"]
+                volatility2 = price_table[stock2 + "_volatility"]
+                print (volatility1)
+                print (volatility2)
                 
-                trial +=1
+                    
+                if not continuous_adjust:
+                    print ("Trade on signal")
+                    if price_table["trade"]:
+                        print ("Trade Day!\n")
+                        stock1_trade = price_table[stock1 + "_shares"]
+                        stock2_trade = price_table[stock2 + "_shares"]
+                    else:
+                        print ("No trade signal\n")
+                else:
+                    print ("Dynamic hedge!")
+                    stock1_trade = price_table[stock1 + "_suggest_shares"]
+                    stock2_trade = price_table[stock2 + "_suggest_shares"]
+        
+        
+                stock1_trade = stock1_trade - stock1_quant
+                stock2_trade = stock2_trade - stock2_quant
+                if ( stock1_trade != stock1_trade ) or ( stock2_trade != stock2_trade ):
+                    self.problem = True
+                    print ("pair trade function problem")
+                    
+                    trial +=1
+                    
+                    continue
                 
+                else:
+                    print ("{},{};{},{}".format(stock1,stock1_trade,stock2,stock2_trade)) 
+                    get_success = True
+                    self.problem = False
+                    return stock1_trade, stock2_trade
+            except Exception as e:
+                print e
+                print ("****************************")
+                print ("      something wrong       ")
+                print ("       restarting           ")
+                time.sleep(30)
                 continue
-            
-            else:
-                print ("{},{};{},{}".format(stock1,stock1_trade,stock2,stock2_trade)) 
-                get_success = True
-                self.problem = False
-                return stock1_trade, stock2_trade
-
     def intraday_trade(self):
         global flat
         
@@ -210,6 +217,7 @@ class bot:
                     self.problem = True
                 flat = True
             print (stock2 + "donesn't meet cutoff, keep!")
+
             
     def sell_and_buy(self):
         if not flat and not self.problem:
@@ -224,7 +232,7 @@ class bot:
                 self.robinhood.place_sell(stock1,abs(stock1_amount))
                 
             if stock2_amount > 0:
-                print ("Place {} long".format(stock1))
+                print ("Place {} long".format(stock2))
                 self.robinhood.place_buy(stock2,abs(stock2_amount))
                 
             elif stock2_amount < 0:
@@ -298,14 +306,14 @@ def bye():
 
 ###########################################################################
 #Debug Area:
-    
+#    
 #bot = bot()
-
+#bot.get_trading_action()
 #price_table = pair_trade(stock1,stock2,initial_capital, window = trade_window, continuous=continuous_adjust)
 #price_table = price_table.iloc[-1]
 #print price_table
 
-###########################################################################
+##########################################################################
 bot = bot()
 schedule.clear()
  ##schedule.every(4).weeks.do(update_fundamentals)
@@ -320,11 +328,11 @@ schedule.every(20).minutes.do(bot.intraday_trade)
  # schedule.every().friday.at("6:30").do(bot.update_price)
 
 
-schedule.every().monday.at("6:30").do(bot.sell_and_buy)
-schedule.every().tuesday.at("6:30").do(bot.sell_and_buy)
-schedule.every().wednesday.at("6:30").do(bot.sell_and_buy)
-schedule.every().thursday.at("6:30").do(bot.sell_and_buy)
-schedule.every().friday.at("6:30").do(bot.sell_and_buy)
+schedule.every().monday.at("5:30").do(bot.sell_and_buy)
+schedule.every().tuesday.at("5:30").do(bot.sell_and_buy)
+schedule.every().wednesday.at("5:30").do(bot.sell_and_buy)
+schedule.every().thursday.at("5:30").do(bot.sell_and_buy)
+schedule.every().friday.at("5:30").do(bot.sell_and_buy)
 
 while True:
     schedule.run_pending()
