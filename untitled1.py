@@ -12,6 +12,6 @@ robinhood = get_robinhood()
 #print robinhood.my_trader.portfolios()["last_core_equity"]
 #print beta(["WLK"],interval="day")
 #print robinhood.hedge("SH",0.3)
-#update_price()
-update_fundamentals(skip_can=True)
+update_price()
+#update_fundamentals(skip_can=True)
 robinhood.logout()

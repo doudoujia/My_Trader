@@ -65,17 +65,18 @@ trade_on = True #default  True
 class bot:
     
     def __init__(self):
-        self.can_trade = False
+        self.problem = False
+        self.login_status = False
         
         trail = 0 
-        while not self.can_trade and trail < 3:
+        while not self.login_status and trail < 3:
             try:
                 self.robinhood = get_robinhood()
                 self.robinhood.logout()
                 self.robinhood.my_trader.login_prompt()
                 self.tickers , self.quantity = self.robinhood.get_my_positions()
                 print "logined"
-                self.can_trade = True
+                self.login_status = True
             except Exception as e:
                 print e
                 self.robinhood.logout()
@@ -92,24 +93,28 @@ class bot:
 #            exit
 
         self.sell_and_buy()
-        print ("sell and buy OK!")
+        if not self.problem:
+            print ("sell and buy OK!")
         self.intraday_trade()
-        print ("intraday trade OK!")
+        if not self.problem:
+            print ("intraday trade OK!")
         time.sleep(2)
         self.robinhood.my_trader.cancel_open_orders()
         print "Order all canceled"
         print ""
         
         
-        self.can_trade = True
 
-        print "Can Trade ",self.can_trade      
+
+        print "Can Trade ",not self.problem      
         
-        if self.can_trade:
+        if not self.problem:
             print "******************************************"
             print "***********Ready To Trade*****************"
             print "******************************************"
-
+        else:
+            print ("##############################")
+            print ("Please check the program")
     def __exit__(self):
         self.robinhood.logout
         print "logouted"
@@ -118,54 +123,63 @@ class bot:
 
 
     def get_trading_action(self):
-        positions = self.robinhood.get_my_positions()
-        positions = pd.DataFrame(data=positions[1],index = positions[0],columns=["Quantity"])
-        if stock1 and stock2 in positions.index:
-            print ("{}, {} in my position".format(stock1,stock2))
-            stock1_quant = positions.loc[stock1][0]
-            stock2_quant = positions.loc[stock2][0]
-            trade_on = True
-        else:
-            stock1_quant = 0
-            stock2_quant = 0
-            trade_on = False
-
-
-        price_table = pair_trade(stock1,stock2,initial_capital, window = trade_window, continuous=continuous_adjust)
-        price_table = price_table.iloc[-1]
-        volatility1 = price_table[stock1 + "_volatility"]
-        volatility2 = price_table[stock2 + "_volatility"]
-        print (volatility1)
-        print (volatility2)
-        if price_table[stock1 + "_suggest_shares"]== np.NaN or price_table[stock2 + "_suggest_shares"]== np.NaN or \
-        price_table[stock1 + "_shares"]== np.NaN or price_table[stock2 + "_suggest_shares"] == np.NaN:
-            self.can_trade = False
-            print ("pair trade function problem")
-            print ()
-            return
-            
-        if not continuous_adjust:
-            print ("Trade on signal")
-            if price_table["trade"]:
-                print ("Trade Day!\n")
-                stock1_trade = price_table[stock1 + "_shares"]
-                stock2_trade = price_table[stock2 + "_shares"]
+        get_success=False
+        trial = 0
+        while not get_success and trial < 3:
+            positions = self.robinhood.get_my_positions()
+            positions = pd.DataFrame(data=positions[1],index = positions[0],columns=["Quantity"])
+            if stock1 and stock2 in positions.index:
+                print ("{}, {} in my position".format(stock1,stock2))
+                stock1_quant = positions.loc[stock1][0]
+                stock2_quant = positions.loc[stock2][0]
+                trade_on = True
             else:
-                print ("No trade signal\n")
-        else:
-            print ("Dynamic hedge!")
-            stock1_trade = price_table[stock1 + "_suggest_shares"]
-            stock2_trade = price_table[stock2 + "_suggest_shares"]
-
-
-        stock1_trade = stock1_trade - stock1_quant
-        stock2_trade = stock2_trade - stock2_quant
-
-        return stock1_trade, stock2_trade
+                stock1_quant = 0
+                stock2_quant = 0
+                trade_on = False
+    
+    
+            price_table = pair_trade(stock1,stock2,initial_capital, window = trade_window, continuous=continuous_adjust)
+            price_table = price_table.iloc[-1]
+            volatility1 = price_table[stock1 + "_volatility"]
+            volatility2 = price_table[stock2 + "_volatility"]
+            print (volatility1)
+            print (volatility2)
+            
+                
+            if not continuous_adjust:
+                print ("Trade on signal")
+                if price_table["trade"]:
+                    print ("Trade Day!\n")
+                    stock1_trade = price_table[stock1 + "_shares"]
+                    stock2_trade = price_table[stock2 + "_shares"]
+                else:
+                    print ("No trade signal\n")
+            else:
+                print ("Dynamic hedge!")
+                stock1_trade = price_table[stock1 + "_suggest_shares"]
+                stock2_trade = price_table[stock2 + "_suggest_shares"]
+    
+    
+            stock1_trade = stock1_trade - stock1_quant
+            stock2_trade = stock2_trade - stock2_quant
+            if ( stock1_trade != stock1_trade ) or ( stock2_trade != stock2_trade ):
+                self.problem = True
+                print ("pair trade function problem")
+                
+                trial +=1
+                
+                continue
+            
+            else:
+                print ("{},{};{},{}".format(stock1,stock1_trade,stock2,stock2_trade)) 
+                get_success = True
+                self.problem = False
+                return stock1_trade, stock2_trade
 
     def intraday_trade(self):
         global flat
-
+        
         if not flat and trade_on:
             now_price = float(self.robinhood.get_last_price(stock1))
             open_price = float(self.robinhood.my_trader.quote_data(stock1)['adjusted_previous_close'])
@@ -178,7 +192,7 @@ class bot:
                     self.robinhood.place_sell(stock2,positions[stock2])
                 except Exception as e:
                     print (e)
-                    self.can_trade = False
+                    self.problem = True
                 flat = True
             print (stock1 + "donesn't meet cutoff, keep!")
             ###################stock seperate#############
@@ -193,12 +207,12 @@ class bot:
                     self.robinhood.place_sell(stock2,positions[stock2])
                 except Exception as e:
                     print (e)
-                    self.can_trade = False
+                    self.problem = True
                 flat = True
             print (stock2 + "donesn't meet cutoff, keep!")
             
     def sell_and_buy(self):
-        if not flat:
+        if not flat and not self.problem:
             stock1_amount, stock2_amount = self.get_trading_action()
             print ("{},{};{},{}".format(stock1,stock1_amount,stock2,stock2_amount))
             if stock1_amount > 0:
@@ -259,7 +273,7 @@ class bot:
 
          flag = False
          trail = 0
-         while not flag and trail < 3:
+         while not flag and trail < 10:
              try:
                  my_positions, position_quantity= self.robinhood.get_my_positions()
                  print "###################################"
@@ -295,7 +309,7 @@ def bye():
 bot = bot()
 schedule.clear()
  ##schedule.every(4).weeks.do(update_fundamentals)
- #schedule.every(2).minutes.do(hi)
+schedule.every(60).minutes.do(bot.get_trading_action)
 schedule.every(20).minutes.do(bot.intraday_trade)
  ##schedule.every(25).minutes.do(mean_reversion_check)
 

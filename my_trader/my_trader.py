@@ -19,14 +19,14 @@ import seaborn as sns
 import pprint
 from datetime import timedelta
 from scipy import stats
-
+from pandas_datareader._utils import RemoteDataError
 #from my_lib import *
 #from my_strategies import *
 
 
 directory = "file/"
 working_suggestion = "Trade_suggestion_minute_1st"
-universe_file_name = "cantrade_1000.csv"
+universe_file_name = "my_universe_industry_sector_marketcap_earnings.csv"
 
 
 def get_price_data(tic_list,method,interval = 1, freq = 'minutes',start_date = datetime.now()-timedelta(days =90),end_date=datetime.now()):
@@ -137,6 +137,9 @@ def get_price_data(tic_list,method,interval = 1, freq = 'minutes',start_date = d
                     #time.sleep(5)
                     trial=3
 
+                except RemoteDataError:
+                    print ("Data not available, skipping")
+                    trial =3
                 except Exception as e:
                     print e
                     print "error occorded in getting yahool historicals for ", i
