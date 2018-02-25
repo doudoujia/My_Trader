@@ -128,7 +128,7 @@ def get_price_data(tic_list,method,interval = 1, freq = 'minutes',start_date = d
             trial = 0
             while trial <3:
                 try:
-                    temp = pdr.get_data_yahoo(i,"yahoo",start_date ,end_date)
+                    temp = da.DataReader(i,"yahoo",start_date ,end_date)
                     index= pd.MultiIndex.from_product([[i],temp.index])
                     temp=pd.DataFrame(data=temp.values,index=index,columns=temp.columns)
                     price = price.append(temp)
