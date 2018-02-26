@@ -1,0 +1,5 @@
+
+*.pyc
+my_trader/my_strategies.pyc
+my_trader/my_trader.pyc
+my_trader/my_strategies.pyc
