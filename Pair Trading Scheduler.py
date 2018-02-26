@@ -328,11 +328,11 @@ schedule.every(20).minutes.do(bot.intraday_trade)
  # schedule.every().friday.at("6:30").do(bot.update_price)
 
 
-schedule.every().monday.at("5:30").do(bot.sell_and_buy)
-schedule.every().tuesday.at("5:30").do(bot.sell_and_buy)
-schedule.every().wednesday.at("5:30").do(bot.sell_and_buy)
-schedule.every().thursday.at("5:30").do(bot.sell_and_buy)
-schedule.every().friday.at("5:30").do(bot.sell_and_buy)
+schedule.every().monday.at("12:50").do(bot.sell_and_buy)
+schedule.every().tuesday.at("12:50").do(bot.sell_and_buy)
+schedule.every().wednesday.at("12:50").do(bot.sell_and_buy)
+schedule.every().thursday.at("12:50").do(bot.sell_and_buy)
+schedule.every().friday.at("12:50").do(bot.sell_and_buy)
 
 while True:
     schedule.run_pending()
