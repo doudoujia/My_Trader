@@ -29,7 +29,7 @@ working_suggestion = "Trade_suggestion_minute_1st"
 universe_file_name = "my_universe_industry_sector_marketcap_earnings.csv"
 
 
-def get_price_data(tic_list,method,interval = 1, freq = 'minutes',start_date = datetime.now()-timedelta(days =90),end_date=datetime.now()):
+def get_price_data(tic_list,method,interval = 1, freq = 'minutes',start_date = datetime.now()-timedelta(days =210),end_date=datetime.now()):
     
     def get_ondemand_data(sym, interval = 1,freq = 'minutes' ,start_date=(datetime.now()-timedelta(days=10))\
                     ,end_date=datetime.now()):
