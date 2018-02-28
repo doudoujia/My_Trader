@@ -1,14 +1,9 @@
 #import needed modules
 
-from numpy import log, polyfit, sqrt, std, subtract
-import statsmodels.tsa.stattools as ts
-import statsmodels.api as sm
-import matplotlib.pyplot as plt
-import seaborn as sns
-import pprint
 
-from my_lib import *
+
 from my_trader import *
+
 
 
 
@@ -419,8 +414,10 @@ def get_data_table(tickers,interval):
 
 def pair_trade(stock1, stock2,initial,method = "day",window = 30,data_len = 210, continuous = False):    
     robinhood = get_robinhood()
+    mongodb = mongo()
     get_succeed = False
     trial = 0
+    
     # stock1 = "VIXY"
     # stock2 = "SPY"
     print ("Rolling window = {}, Backtest length= {}".format(window,data_len))
@@ -429,17 +426,23 @@ def pair_trade(stock1, stock2,initial,method = "day",window = 30,data_len = 210,
         try:
             if method == "day":
     
-                price1 = get_price_data([stock1],method="day",start_date=datetime.now()-timedelta(days=data_len),end_date=datetime.now()-timedelta(days=0))
-                price2 = get_price_data([stock2],method="day",start_date=datetime.now()-timedelta(days=data_len),end_date=datetime.now()-timedelta(days=0))
-    
-    
+                #price1 = get_price_data([stock1],method="day",start_date=datetime.now()-timedelta(days=data_len),end_date=datetime.now()-timedelta(days=0))
+                #price2 = get_price_data([stock2],method="day",start_date=datetime.now()-timedelta(days=data_len),end_date=datetime.now()-timedelta(days=0))
+                try:
+                    price1 = mongodb.query_database(stock1,start_date=datetime.now()-timedelta(days=data_len),end_date=datetime.now()-timedelta(days=0))
+                    price2 = mongodb.query_database(stock2,start_date=datetime.now()-timedelta(days=data_len),end_date=datetime.now()-timedelta(days=0))
+                except Exception as e:
+                    print e
+                    price1 = get_price_data([stock1],method="day",start_date=datetime.now()-timedelta(days=data_len),end_date=datetime.now()-timedelta(days=0))
+                    price2 = get_price_data([stock2],method="day",start_date=datetime.now()-timedelta(days=data_len),end_date=datetime.now()-timedelta(days=0))
+                
             elif method == "minute":
                 price1 = get_price_data([stock1],method = "robinhood")
                 price2 = get_price_data([stock2],method = "robinhood")
             price1 = price1.set_index("TimeStamp")
             price2 = price2.set_index("TimeStamp")
-            price1 = price1.rename(columns={"Close":stock1+"_close"})
-            price2 = price2.rename(columns={"Close":stock2+"_close"})
+            price1 = price1.rename(columns={"Adj Close":stock1+"_close"})
+            price2 = price2.rename(columns={"Adj Close":stock2+"_close"})
     
     
     
@@ -450,10 +453,14 @@ def pair_trade(stock1, stock2,initial,method = "day",window = 30,data_len = 210,
             price_table[stock1+"_log_ret"] = log(price_table[stock1+"_close"] / price_table[stock1+"_close"].shift(1))
             price_table[stock2+"_log_ret"] = log(price_table[stock2+"_close"] / price_table[stock2+"_close"].shift(1))
             price_table["relative"]=price_table[stock1+"_log_ret"]/price_table[stock2+"_log_ret"]
-    
-            price_table.relative.loc[price_table.relative==-np.inf]=price_table.relative.shift(1)
-            # price_table.relative.loc[price_table.relative==np.NaN]=price_table.relative.shift(1)
             price_table.relative.fillna(method="ffill")
+
+            price_table.relative.loc[price_table.relative==-np.inf]=\
+                price_table.loc[price_table.relative != -np.inf].sort_values("relative",ascending =True).iloc[0]["relative"]
+            # price_table.relative.loc[price_table.relative==np.NaN]=price_table.relative.shift(1)
+            price_table.relative.loc[price_table.relative==np.inf]=\
+                price_table.loc[price_table.relative != np.inf].sort_values("relative",ascending =False).iloc[0]["relative"]
+            
     
             price_table[stock1+"_volatility"] = price_table[stock1+"_log_ret"].rolling(window,min_periods=window-5).std()
             price_table[stock2+"_volatility"] = price_table[stock2+"_log_ret"].rolling(window,min_periods=window-5).std()

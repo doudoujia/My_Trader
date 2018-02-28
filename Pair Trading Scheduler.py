@@ -296,6 +296,12 @@ class bot:
                  continue
 
 
+def daily_update_db():
+    mongodb = mongo()
+    all_stock_data = mongodb.get_all_quote()
+    mongodb.update_db(all_stock_data)
+        
+
 
 def hi():
     print (datetime.now())
@@ -328,11 +334,12 @@ schedule.every(20).minutes.do(bot.intraday_trade)
  # schedule.every().friday.at("6:30").do(bot.update_price)
 
 
-schedule.every().monday.at("12:50").do(bot.sell_and_buy)
-schedule.every().tuesday.at("12:50").do(bot.sell_and_buy)
-schedule.every().wednesday.at("12:50").do(bot.sell_and_buy)
-schedule.every().thursday.at("12:50").do(bot.sell_and_buy)
-schedule.every().friday.at("12:50").do(bot.sell_and_buy)
+schedule.every().monday.at("12:30").do(bot.sell_and_buy)
+schedule.every().tuesday.at("12:30").do(bot.sell_and_buy)
+schedule.every().wednesday.at("12:30").do(bot.sell_and_buy)
+schedule.every().thursday.at("12:30").do(bot.sell_and_buy)
+schedule.every().friday.at("12:30").do(bot.sell_and_buy)
+schedule.every().at("2:30").do(daily_update_db)
 
 while True:
     schedule.run_pending()

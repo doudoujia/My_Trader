@@ -49,8 +49,8 @@ for i in tradeable.Symbol:
         if i==j:
             continue
         else:
-            if count %20 ==0:
-                time.sleep(60)
+#            if count %20 ==0:
+#                time.sleep(60)
             
             print ("\n")
             print ("***************************")
