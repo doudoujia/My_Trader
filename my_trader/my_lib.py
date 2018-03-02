@@ -1,30 +1,4 @@
 
-import time
-import timeit
-import talib as ta
-import numpy as np
-from Robinhood import Robinhood
-from pandas import *
-import xlrd
-import  talib as ta
-from datetime import datetime
-from datetime import timedelta
-from pandas_datareader import data as da
-import pandas as pd
-import numpy as np
-from numpy import log, polyfit, sqrt, std, subtract
-import statsmodels.tsa.stattools as ts
-import statsmodels.api as sm
-import matplotlib.pyplot as plt
-import seaborn as sns
-import pprint
-from my_trader import *
-import requests as r
-from bs4 import BeautifulSoup as bs
-import yahoo_finance
-from yahoo_finance import Share
-from pandas_datareader import data as pdr
-import fix_yahoo_finance as yf
 
 
 from my_trader import *
@@ -168,6 +142,34 @@ def get_price_data(tic_list,method,interval = 1, freq = 'minutes',start_date = d
                     if trial == 3:
                         error.append([i,'get_yahoo_historicals'])
         # get rid of the multiindex 
+    elif method == "realtimeday":
+        save_file_name = "Trade_suggestion_day"
+        mongodb = mongo()
+        for i in tic_list:
+            trial = 0
+            while trial <3:
+                try:
+                    temp = da.DataReader(i,"yahoo",start_date ,end_date)
+                    index= pd.MultiIndex.from_product([[i],temp.index])
+                    temp=pd.DataFrame(data=temp.values,index=index,columns=temp.columns)
+                    price = price.append(temp)
+                    print "Finished", i
+                    trial = 3
+                except Exception as e:
+                    try:
+                        print (e)
+                        print "Finished", i 
+                        #time.sleep(5)
+                        trial=3
+                        print e
+                        
+                    except Exception as e:
+                        print "error occorded in getting yahool historicals for ", i
+                        trial =3
+                        trial +=1
+                        time.sleep(10)
+                    if trial == 3:
+                        error.append([i,'get_yahoo_historicals'])
         price = price.reset_index()
 
         

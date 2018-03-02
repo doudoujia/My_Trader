@@ -29,10 +29,13 @@ class mongo:
 
     def get_all_quote(self):
         result = pd.DataFrame()
-        all_stock = pd.read_csv(directory + self.stock_list)
-        all_stock = all_stock.append(pd.read_csv(directory + self.ETF_list))
-        for i in range(199,len(all_stock),200):
-            tic_list = all_stock.Ticker[i-199:i].astype(str)
+        all_stock_1 = pd.read_csv(directory + self.stock_list)
+        all_stock_2 = pd.read_csv(directory + self.ETF_list)
+        all_stock_2 = all_stock_2.rename(columns={"Symbol":"Ticker"})
+        all_stock = all_stock_1.append(all_stock_2)
+        all_stock = all_stock.reset_index()
+        for i in range(99,len(all_stock),100):
+            tic_list = all_stock.Ticker.iloc[i-99:i].astype(str)
             result = result.append(self.get_ondemand_quote(tic_list))   
         return result
 
@@ -48,7 +51,7 @@ class mongo:
         if len(get_frame) == 0:
             print ("no data for " + stock)
         get_frame[u'TimeStamp'] = get_frame[u'TimeStamp'].apply(lambda x: datetime.utcfromtimestamp(0) + timedelta(milliseconds= x))
-        get_frame = get_frame.loc[:,["TimeStamp",'Adj Close','High','Low','Open','Return','Ticker',"Volume"]]
+        get_frame = get_frame.loc[:,["TimeStamp",'Adj Close','High','Low','Open','Ticker',"Volume"]]
         get_frame = get_frame.dropna()
         get_frame = get_frame.reindex()
         return get_frame
@@ -59,14 +62,20 @@ class mongo:
 
     def update_db(self,stock):
         for i in stock.Ticker:
-            client = pymongo.MongoClient()
-            db = client["stocks_daily"]
-            collection = db[i]
-            quote = stock.loc[stock.Ticker==i]
-            quote.loc[:,'TimeStamp']  = datetime.strptime(quote['TimeStamp'].values[0][0:10],"%Y-%m-%d")
-            quote = json.loads(quote.T.to_json()).values()[0]
-            collection.update_many({"TimeStamp":quote[u'TimeStamp']},{"$set": quote },upsert=True)
-            print ("successed " + i)
+            try:
+                client = pymongo.MongoClient()
+                db = client["stocks_daily"]
+                collection = db[i]
+                quote = stock.loc[stock.Ticker==i]
+                quote.loc[:,'TimeStamp']  = datetime.strptime(quote['TimeStamp'].values[0][0:10],"%Y-%m-%d")
+                quote = json.loads(quote.T.to_json()).values()[0]
+                collection.update_many({"TimeStamp":quote[u'TimeStamp']},{"$set": quote },upsert=True)
+                clear_output()
+                print ("successed " + i)
+            except Exception as e:
+                print e
+                print ("error occored in updating "+ str(i))
+                continue 
 
     def delete_duplicates(self,stock):
 

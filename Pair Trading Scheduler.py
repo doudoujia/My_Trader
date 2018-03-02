@@ -339,8 +339,8 @@ schedule.every().tuesday.at("12:30").do(bot.sell_and_buy)
 schedule.every().wednesday.at("12:30").do(bot.sell_and_buy)
 schedule.every().thursday.at("12:30").do(bot.sell_and_buy)
 schedule.every().friday.at("12:30").do(bot.sell_and_buy)
-schedule.every().at("2:30").do(daily_update_db)
-
+schedule.every().days.at("12:00").do(daily_update_db)
+schedule.every().days.at("18:00").do(daily_update_db)
 while True:
     schedule.run_pending()
     

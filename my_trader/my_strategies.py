@@ -3,6 +3,8 @@
 
 
 from my_trader import *
+from mongo_lib import *
+from my_lib import *
 
 
 
@@ -422,7 +424,7 @@ def pair_trade(stock1, stock2,initial,method = "day",window = 30,data_len = 210,
     # stock2 = "SPY"
     print ("Rolling window = {}, Backtest length= {}".format(window,data_len))
     
-    while not get_succeed and trial < 5:
+    while not get_succeed and trial < 1:
         try:
             if method == "day":
     
@@ -431,19 +433,28 @@ def pair_trade(stock1, stock2,initial,method = "day",window = 30,data_len = 210,
                 try:
                     price1 = mongodb.query_database(stock1,start_date=datetime.now()-timedelta(days=data_len),end_date=datetime.now()-timedelta(days=0))
                     price2 = mongodb.query_database(stock2,start_date=datetime.now()-timedelta(days=data_len),end_date=datetime.now()-timedelta(days=0))
+                    price1 = price1.rename(columns={"Adj Close":stock1+"_close"})
+                    price2 = price2.rename(columns={"Adj Close":stock2+"_close"})
                 except Exception as e:
                     print e
                     price1 = get_price_data([stock1],method="day",start_date=datetime.now()-timedelta(days=data_len),end_date=datetime.now()-timedelta(days=0))
                     price2 = get_price_data([stock2],method="day",start_date=datetime.now()-timedelta(days=data_len),end_date=datetime.now()-timedelta(days=0))
-                
+                    
+            elif method =="realtimeday":
+                price1 = get_price_data([stock1],method="realtimeday",start_date=datetime.now()-timedelta(days=data_len),end_date=datetime.now()-timedelta(days=0))
+                price2 = get_price_data([stock2],method="realtimeday",start_date=datetime.now()-timedelta(days=data_len),end_date=datetime.now()-timedelta(days=0))
+                price1 = price1.rename(columns={"Adj Close":stock1+"_close"})
+                price2 = price2.rename(columns={"Adj Close":stock2+"_close"})
+
             elif method == "minute":
                 price1 = get_price_data([stock1],method = "robinhood")
                 price2 = get_price_data([stock2],method = "robinhood")
+                price1 = price1.rename(columns={"Close":stock1+"_close"})
+                price2 = price2.rename(columns={"Close":stock2+"_close"})
             price1 = price1.set_index("TimeStamp")
             price2 = price2.set_index("TimeStamp")
-            price1 = price1.rename(columns={"Adj Close":stock1+"_close"})
-            price2 = price2.rename(columns={"Adj Close":stock2+"_close"})
-    
+            
+           
     
     
             price_table = pd.concat([price1[stock1+"_close"],price2[stock2+"_close"]],axis = 1)
@@ -471,7 +482,8 @@ def pair_trade(stock1, stock2,initial,method = "day",window = 30,data_len = 210,
             price_table["relative_mv"] = price_table["relative"].rolling(window, min_periods=window-5).mean()
             #price_table["relative_mv"]=price_table[stock1+"_log_ret_mv"]/price_table[stock2+"_log_ret_mv"]
             price_table["z_score"] =( price_table["relative"]-price_table["relative_mv"])/price_table.relative.std()
-    
+            price_table.fillna(method="ffill")
+            # price_table.fillna(method="bfill")
             # price_table["trade_signal"]=np.NaN
     
     
@@ -635,10 +647,13 @@ def pair_trade(stock1, stock2,initial,method = "day",window = 30,data_len = 210,
             if (exam_data[stock1+"_suggest_shares"] != exam_data[stock1+"_suggest_shares"] ) or \
             (exam_data[stock2+"_suggest_shares"] != exam_data[stock2+"_suggest_shares"] ):
                 print ("pair trade function problem")
+                print ("Getting the most recent valid input")
     
                 trial +=1
-                print price_table.iloc[-1]
-                continue
+                print price_table.iloc[-1].name
+                price_table = price_table.iloc[:-1]
+                return price_table
+                
     
             else:
                 print ("Done!") 
