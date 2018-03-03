@@ -225,19 +225,19 @@ class bot:
             print ("{},{};{},{}".format(stock1,stock1_amount,stock2,stock2_amount))
             if stock1_amount > 0:
                 print ("Place {} long".format(stock1))
-                self.robinhood.place_buy(stock1,abs(stock1_amount))
+                self.robinhood.place_buy(stock1,abs(stock1_amount),order_type="market")
                 
             elif stock1_amount < 0:
                 print ("Place {} short".format(stock1))
-                self.robinhood.place_sell(stock1,abs(stock1_amount))
+                self.robinhood.place_sell(stock1,abs(stock1_amount),order_type="market")
                 
             if stock2_amount > 0:
                 print ("Place {} long".format(stock2))
-                self.robinhood.place_buy(stock2,abs(stock2_amount))
+                self.robinhood.place_buy(stock2,abs(stock2_amount),order_type="market")
                 
             elif stock2_amount < 0:
                 print ("Place {} short".format(stock2))
-                self.robinhood.place_sell(stock2,abs(stock2_amount))
+                self.robinhood.place_sell(stock2,abs(stock2_amount),order_type="market")
                 
             else:
                 print ("nothing happened")

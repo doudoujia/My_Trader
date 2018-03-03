@@ -1,4 +1,5 @@
 
+import csv
 import time
 import timeit
 import talib as ta
@@ -247,7 +248,7 @@ class get_robinhood:
 
         return profile_temp['tradeable']
 
-    def place_buy(self, ticker,num,price=None):
+    def place_buy(self, ticker,num,price=None,order_type="limit"):
         if price ==None:
             price = self.get_bid_price(ticker)
         try:
@@ -255,7 +256,7 @@ class get_robinhood:
                 stock_inst = i
                 if stock_inst["symbol"]==ticker:
                     print ("Ticker found in instruments :", ticker)
-                    if str(self.my_trader.place_order(stock_inst,num,price,"buy",order="limit")) == "<Response [201]>":
+                    if str(self.my_trader.place_order(stock_inst,num,price,"buy",order=order_type)) == "<Response [201]>":
                          print ("Trade Success!: " + ticker)
                     else:
                          print ("Trade Fail: " + ticker)
@@ -267,7 +268,7 @@ class get_robinhood:
             print ("Trade Fail: " + ticker)
             pass
 
-    def place_sell(self, ticker,num,price=None):
+    def place_sell(self, ticker,num,price=None,order_type="limit"):
         if price ==None:
             price = self.get_last_price(ticker)
         try:
@@ -275,7 +276,7 @@ class get_robinhood:
                 stock_inst = i
                 if stock_inst["symbol"]==ticker:
                     print ("Ticker found in instruments", ticker)
-                    if str(self.my_trader.place_order(stock_inst,num,price,"sell",order="limit")) == "<Response [201]>":
+                    if str(self.my_trader.place_order(stock_inst,num,price,"sell",order=order_type)) == "<Response [201]>":
                          print ("Trade Success!: " + ticker)
                     else:
                          print ("Trade Fail: " + ticker)
@@ -286,7 +287,6 @@ class get_robinhood:
             print e
             print ("Trade Fail: " + ticker)
             pass
-
 
     def get_my_positions(self):   
         my_positions=[]

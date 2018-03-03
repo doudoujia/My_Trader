@@ -41,6 +41,8 @@ res_ave_return=[]
 res_volatility=[]
 res_sharp_ratio=[]
 pairs=[]
+header = [('pairs','ave_return','total_return','volatility',	'sharp_ratio')]
+my_csv=write_my_csv("pair_equity_0302.csv",header)
 for i in tradeable.Ticker:
      start_point+=1    
      for j in tradeable.Ticker:
@@ -65,31 +67,32 @@ for i in tradeable.Ticker:
                 ave_return = temp_price.p_L.mean()
                 volatility = temp_price.p_L.std()
                 sharp_ratio = ave_return/volatility 
-                res_total_return.append(total_return)
-                res_ave_return.append(ave_return)
-                res_volatility.append(volatility)
-                res_sharp_ratio.append(sharp_ratio)
-                pairs.append((i,j))
+#                res_total_return.append(total_return)
+#                res_ave_return.append(ave_return)
+#                res_volatility.append(volatility)
+#                res_sharp_ratio.append(sharp_ratio)
+#                pairs.append((i,j))
                 print ("Total return = {}".format(total_return))
                 print ("Average return = {}".format(ave_return))
                 print ("Volatility = {}".format(volatility))
                 print ("Sharp_ratio = {}".format(sharp_ratio))
-                if total_return >100 and ave_return > 5:
-                    pair.append((i,j))
-                if sharp_ratio >1:
-                    good_pair.append((i,j))
-                if count %100 ==0:
-                    final = pd.DataFrame({"pairs":pairs,"total_return":res_total_return,\
-    "ave_return":res_ave_return,"volatility":res_volatility,\
-    "sharp_ratio":res_sharp_ratio})
-                    final.to_csv("pair_trade_BT_ETF.csv")
+                my_csv.write_row([((i,j),total_return,ave_return,volatility,sharp_ratio)])
+#                if total_return >100 and ave_return > 5:
+#                    pair.append((i,j))
+#                if sharp_ratio >1:
+#                    good_pair.append((i,j))
+#                if count %100 ==0:
+#                    final = pd.DataFrame({"pairs":pairs,"total_return":res_total_return,\
+#    "ave_return":res_ave_return,"volatility":res_volatility,\
+#    "sharp_ratio":res_sharp_ratio})
+#                    final.to_csv("pair_trade_BT.csv")
             except Exception as e:
                 print e    
                 continue
         complete_line(float(count)/(len(tradeable)*len(tradeable)))
-final = pd.DataFrame({"pairs":pairs,"total_return":res_total_return,\
-    "ave_return":res_ave_return,"volatility":res_volatility,\
-    "sharp_ratio":res_sharp_ratio})
-final.to_csv("pair_trade_BT_ETF.csv")
+#final = pd.DataFrame({"pairs":pairs,"total_return":res_total_return,\
+#    "ave_return":res_ave_return,"volatility":res_volatility,\
+#    "sharp_ratio":res_sharp_ratio})
+final.to_csv("pair_trade_BT.csv")
 stop = timeit.default_timer()
 print ("total time {}".format(stop-start))

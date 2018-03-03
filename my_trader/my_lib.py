@@ -11,6 +11,19 @@ yf.pdr_override()
 #********************************************************
 
 
+class write_my_csv:
+    def __init__(self, filename, header_list):
+        self.filename = filename
+        with open(self.filename,"wb") as myfile:
+            writer = csv.writer(myfile,delimiter=',')
+            writer.writerows(header_list)
+    
+    def write_row(self,data_list_tuple):
+        with open(self.filename,"ab") as myfile:
+            writer = csv.writer(myfile,delimiter=',')
+            writer.writerows(data_list_tuple)
+
+
 
 def get_price_data(tic_list,method,interval = 1, freq = 'minutes',start_date = datetime.now()-timedelta(days =210),end_date=datetime.now()):
     
