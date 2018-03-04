@@ -12,11 +12,12 @@ yf.pdr_override()
 
 
 class write_my_csv:
-    def __init__(self, filename, header_list):
+    def __init__(self, filename, header_list,new_flag=True):
         self.filename = filename
-        with open(self.filename,"wb") as myfile:
-            writer = csv.writer(myfile,delimiter=',')
-            writer.writerows(header_list)
+        if new_flag:
+            with open(self.filename,"wb") as myfile:
+                writer = csv.writer(myfile,delimiter=',')
+                writer.writerows(header_list)
     
     def write_row(self,data_list_tuple):
         with open(self.filename,"ab") as myfile:
