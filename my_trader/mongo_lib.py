@@ -4,9 +4,9 @@ from my_trader import *
 
 class mongo:
 
-    def __init__(self,freq = "stocks_daily"):
+    def __init__(self,coll_name = "stocks_daily"):
         self.client = pymongo.MongoClient()
-        self.db = self.client[freq]
+        self.db = self.client[coll_name]
         self.stock_list = "cantrade.csv"
         self.ETF_list = "ETFList.csv"
         self.initiate_list = [self.stock_list,self.ETF_list]

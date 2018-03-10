@@ -282,3 +282,26 @@ JavaScript error: resource://devtools/shared/base-loader.js -> resource://devtoo
 JavaScript error: resource://devtools/shared/base-loader.js -> resource://devtools/server/actors/highlighters/box-model.js, line 410: TypeError: quads is undefined
 JavaScript error: resource://devtools/shared/base-loader.js -> resource://devtools/server/actors/highlighters/box-model.js, line 410: TypeError: quads is undefined
 JavaScript error: resource://devtools/shared/base-loader.js -> resource://devtools/shared/webconsole/network-monitor.js, line 527: TypeError: this.sink is null
+1520714392000	geckodriver	INFO	geckodriver 0.19.1
+1520714392093	geckodriver	INFO	Listening on 127.0.0.1:56029
+1520714393086	mozrunner::runner	INFO	Running command: "/Applications/Firefox.app/Contents/MacOS/firefox-bin" "-marionette" "-profile" "/var/folders/k5/0d31hs6j6hl48p3kbcp1b_jm0000gn/T/rust_mozprofile.7SFbtTEuHQoz"
+1520714393733	Marionette	INFO	Enabled via --marionette
+2018-03-10 12:39:54.818 plugin-container[17367:720841] *** CFMessagePort: bootstrap_register(): failed 1100 (0x44c) 'Permission denied', port = 0x9f37, name = 'com.apple.tsm.portname'
+See /usr/include/servers/bootstrap_defs.h for the error codes.
+1520714395256	Marionette	INFO	Listening on port 56038
+1520714395365	Marionette	WARN	TLS certificate errors will be ignored for this session
+2018-03-10 12:39:55.680 plugin-container[17368:720917] *** CFMessagePort: bootstrap_register(): failed 1100 (0x44c) 'Permission denied', port = 0x9c37, name = 'com.apple.tsm.portname'
+See /usr/include/servers/bootstrap_defs.h for the error codes.
+console.error: 
+  Protocol error (noSuchActor): No such actor for ID: server1.conn0.child1/highlighter29
+1520721620658	geckodriver	INFO	geckodriver 0.19.1
+1520721620742	geckodriver	INFO	Listening on 127.0.0.1:56922
+1520721621747	mozrunner::runner	INFO	Running command: "/Applications/Firefox.app/Contents/MacOS/firefox-bin" "-marionette" "-profile" "/var/folders/k5/0d31hs6j6hl48p3kbcp1b_jm0000gn/T/rust_mozprofile.A9RY7nTt6kV3"
+1520721622966	Marionette	INFO	Enabled via --marionette
+2018-03-10 14:40:26.035 plugin-container[17784:737667] *** CFMessagePort: bootstrap_register(): failed 1100 (0x44c) 'Permission denied', port = 0x9b37, name = 'com.apple.tsm.portname'
+See /usr/include/servers/bootstrap_defs.h for the error codes.
+2018-03-10 14:40:28.378 plugin-container[17785:737734] *** CFMessagePort: bootstrap_register(): failed 1100 (0x44c) 'Permission denied', port = 0x9b37, name = 'com.apple.tsm.portname'
+See /usr/include/servers/bootstrap_defs.h for the error codes.
+1520721628633	Marionette	INFO	Listening on port 56931
+1520721628660	Marionette	WARN	TLS certificate errors will be ignored for this session
+1520722707470	addons.productaddons	WARN	Failed downloading via XHR, status: 0, reason: error
